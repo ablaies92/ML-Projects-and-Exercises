@@ -1,8 +1,8 @@
-# 1st Capstone - Can Big Mountain Resort Raise their Daily Ticket Price?
+# 2nd Capstone - Can one model the US Used Car Market?
 
-This analysis includes various notebooks that break up the comprehensive Data Science project lifecycle (initial data discovery/loading (data wrangling), exploratory data analysis, preprocessing and modelling)
+The objective of this project is to develop a predictive model that automates the domestic used car sales market appraisal and estimation/evaluation process. 
 
-The purpose of this data science project is to come up with a pricing model for ski resort tickets in our market segment. Big Mountain suspects it may not be maximizing its returns, relative to its position in the market. It also does not have a strong sense of what facilities matter most to visitors, particularly which ones they're most likely to pay more for. This project aims to build a predictive model for ticket price based on a number of facilities, or properties, boasted by resorts (at the resorts). This model will be used to provide guidance for Big Mountain's pricing and future facility investment plans.
+The main driving force behind the development of this model is to minimize laborious efforts that go into researching used car sales data (e.g. what can I get for a 2011 toyota camry SE?) by deploying a model built using historical data with the ability to consume new data (leveraging Bayesian principles – ideal, future state model). 
 
 ## Pipenv
 

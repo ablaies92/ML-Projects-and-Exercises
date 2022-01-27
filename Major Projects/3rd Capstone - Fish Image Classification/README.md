@@ -1,8 +1,9 @@
-# 1st Capstone - Can Big Mountain Resort Raise their Daily Ticket Price?
+# 3rd Capstone -  To develop a generalized, predictive model that can identify and differentiate between different types of fish species that share similar characteristics
 
-This analysis includes various notebooks that break up the comprehensive Data Science project lifecycle (initial data discovery/loading (data wrangling), exploratory data analysis, preprocessing and modelling)
-
-The purpose of this data science project is to come up with a pricing model for ski resort tickets in our market segment. Big Mountain suspects it may not be maximizing its returns, relative to its position in the market. It also does not have a strong sense of what facilities matter most to visitors, particularly which ones they're most likely to pay more for. This project aims to build a predictive model for ticket price based on a number of facilities, or properties, boasted by resorts (at the resorts). This model will be used to provide guidance for Big Mountain's pricing and future facility investment plans.
+The ideal model has a myriad of potential use cases that include the following:
+1.	High volume fish processing plant: ability to dynamically identify and separate different (in tandem with robotics) fish species to optimize the handling and processing of fish 
+2.	Use for identification of fish species for environmental conservation efforts: this would require augmentation of the existing model to account for different environmental contexts
+3.	Potentially leverage existing model to develop a more sophisticated model that can accurately measure the dimensions (length and width) of the fish as well as the weight 
 
 ## Pipenv
 
