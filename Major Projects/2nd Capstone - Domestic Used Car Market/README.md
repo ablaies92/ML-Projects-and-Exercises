@@ -1,4 +1,4 @@
-# 2nd Capstone - Can one model the US Used Car Market?
+# 2nd Capstone - Can you model the US Used Car Market?
 
 The objective of this project is to develop a predictive model that automates the domestic used car sales market appraisal and estimation/evaluation process. 
 
