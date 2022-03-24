@@ -1,0 +1,21 @@
+Python Functions:
+	- can write PostgreSQL functions in Python
+	- uses a postgres extension
+	- need superuser privileges 
+		- ALTER USER Postgres WITH superuser
+	CREATE EXTENSION plpython3u
+	pros and cons:
+		- I already know python (pro)
+		- reuse code that i've already written (pro)
+		- avoid having to learn PL/pgSQL for procedural code (pro)
+		- arguments are treated as global variables
+		- not a trusted language, so code may damage the database (con)
+		- installation can vary by PostgreSQL package (con)
+	
+Example -
+	CREATE FUNCTION pymax (x x integer, y integer)
+		RETURNS integer
+	AS $$
+		if x>y:
+			return x
+	$$LANGUAGE plpython3u;

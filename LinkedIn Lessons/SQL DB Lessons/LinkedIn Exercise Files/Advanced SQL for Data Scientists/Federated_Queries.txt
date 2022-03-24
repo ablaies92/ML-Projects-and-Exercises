@@ -1,0 +1,33 @@
+Federated Queries - data outside of the database, but is still accessible by SQL
+	- SQL/MED (Management of External Data)
+	- Foreign-data wrappers
+	- allow for viewing data outside of the database
+	- datalinks provide database functionality
+	
+How do we create/connect such a source within our sql environment? Need to import the extension below first
+	CREATE EXTENSION postgres_fdw
+	CREATE SERVER external_db_server
+		-- calling on the postgres data_wrapper and locating the connection source
+		FOREIGN DATA WRAPPER postgres_fdw
+		OPTIONS (host 'mydb.example.com', dbname 'data_warehouse');
+		
+How can we map users? 
+	CREATE USER MAPPING FOR CURRENT_USER
+		SERVER external_db_server
+		OPTIONS (user 'analyst', password 'adjafw23nn&2!);
+		
+What about mapping a schema? Effectively, we are calling on the sales schema from the external datasource and mapping it as the schema for the defined external_db_server
+	CREATE SCHEMA external_sales; 
+	IMPORT FOREIGN SCHEMA sales
+		FROM SERVER external_db_server
+		INTO external_sales;
+		
+Creating a Foreign Table : example is accessing an external file... structured data
+	CREATE FOREIGN TABLE page_visit_log (
+		log_time timestamp, 
+		user_name text, 
+		web_page text
+		) SERVER log_data
+		OPTIONS (filename '/app/ecommerce/logs 
+		page_visits.log', format 'csv');
+		

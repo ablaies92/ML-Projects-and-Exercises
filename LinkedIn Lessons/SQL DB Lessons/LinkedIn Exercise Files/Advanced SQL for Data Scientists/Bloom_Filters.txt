@@ -1,0 +1,22 @@
+Bloom Filter Indexes:
+	- space efficient method for determining set membership
+	- useful for quickly finding sets with values
+	- lossy representation of data (cannot take the compressed version and replicate the original source)
+	- probabilistic data structure
+		- may produce false positives
+		- never produces false negative 
+		- accuracy is a function of the number of bits used in the filter
+		- in many cases 10 bits per element will yield 1% false positive rate
+	- useful when a table has many attributes
+	- queries filter on many different combinations of attribute
+	- B-tree indexes are faster, but you are using much more space
+	- bloom filter indexes support only equality operator on int4 and text data types
+	- B-tree indexes support equality, inequality and ranges
+
+How to create a bloom filter: remember, this will return some false positives
+	- CREATE EXTENSION bloom
+	- CREATE INDEX idx_locations_blm ON locations
+	-		USING bloom (city, state_province, country);
+	- CREATE INDEX idx_locations_blm ON locations
+	-		USING bloom (city, state_province, country)
+	-		WITH (length=128);

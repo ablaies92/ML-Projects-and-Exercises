@@ -1,0 +1,59 @@
+-- Normalization (minimize the risk of data anomalies by organizing the data into multiple, related tables; this also
+-- minimizes redundancies)
+-- 		these types of redundancies only increase the database's size and lead to downstream issues
+--      e.g. if you have three columns that are the same for every student in a class (class name, teacher and location),
+--		it makes sense to break the two tables apart, so that changing values is manageable
+-- Types of anomalies (update anomaly, partially updating existing observations)
+-- 		insertion anomaly (not able to add data to the db because of missing information)
+-- 		deletion anomaly (might lose an author's address because we deleted the only book tied to the author)
+-- Avoiding anomalies by following normalization rules
+-- 		1st normal form (each value in a column is an atomic unit)
+-- 		2nd normal form (all attributes not part of the key depend on the key)
+-- 		3rd normal form (no transitive dependencies)
+-- Performance issues with normalization techniques
+--		with many joins, the performance decreases substancially
+--		the way normalized databases process data is akin to going to the grocery store and shopping for each meal separately
+--		and you first have to finish collecting your items for meal A before going onto meal B
+--		hence, if meal A required eggs, flour, milk and bacon, you would have to go to the dairy section, down aisle 10 (flour)
+--      and then the meat section; if meal B required chicken, stock, milk and some vegetables, you would then have to go 
+--		back to the dairy section, then the protein section and over to the produce section to complete the task
+-- OLTP (online transaction process systems)
+-- 		typically have many reads and writes
+--		many processes
+--		often normalized to third normal form
+-- Analytical db 
+--		data analysis
+--		many reads by many processes
+--		many writes by a few processes
+-- 		may have streaming data
+
+
+-- Denormalization (may enhance performance)
+--		disadvantages:
+-- 			redundant data
+--			non-atomic values
+--		advantages:
+--			tolerate transitive dependencies
+--			enhanced performance when complex joins would otherwise be required (also, easier to query)
+--			efficient queries
+--			simplifies load procedures (dealing with slowly changing dimensions)
+--			think of going to the store with the idea of making 3 separate meals; when you get to the store, there are 
+--			three sections will all ingredients required to make each meal within a single section
+-- Reduce risk of anomalies
+--		few updates
+--		batch inserts; data transformed before inserts
+--		streaming inserts; simple data structures
+--		eliminate the need for complex joins, as these can take up a lot of overhead space
+--		follow the star schema
+--		fact table in middle - branches are "dimension" tables
+--			commonly done in databases with row-level orientation; when you read in a data block, you read the entire 
+--			row at one time
+
+-- Combine the two methods in order to achieve success
+--		it is possible to have normalized and denormalized datasets within the same database
+--		maybe the underlying structure is comprised of a series of related, normalized tables
+--		if a query/report requires a lot of joins, it might make sense to create another table 
+--		that is flatten and essentially writes/updates periodically from the related tables; this
+--		new table would effectively be denormalized
+
+

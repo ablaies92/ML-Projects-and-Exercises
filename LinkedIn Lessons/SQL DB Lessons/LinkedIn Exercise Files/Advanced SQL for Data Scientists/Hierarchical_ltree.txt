@@ -1,0 +1,95 @@
+Hierarchical data and ltrees:
+- will typically use recursive common table expressions (CTE)
+- if using Oracle, you can use "CONNECT BY"
+
+	- hierarchical data can be represented in two different ways:
+		- e.g. 1
+			id	node parent_node
+			1	A	 NULL		
+			2	B	 1
+			3	C	 1
+			4	D	 2
+		- e.g. 2 (path column via string) - materialized paths
+			id  node parent_node
+			1	A	 A
+			2	B	 A.B
+			3	C	 A.C
+			4	D	 A.B.D
+			
+			- use search and pattern match on string in order to identify/sort/filter
+			
+- the ltree extension is the answer
+	- PostgreSQL extension for working with trees and paths
+	- Many operators for operating on and comparing paths
+		- @> - ancestor
+		- <@ - descendent
+		- || - concatenate tree paths
+		- ~ - does ltree match an ltree text query?
+	- Support B-tree and GiST indexes
+	- Even more operators with GiST index
+
+
+Example -->
+CREATE EXTENSION ltree;
+
+CREATE TABLE paths_to_nodes(
+	id serial primary key, 
+	node text, 
+	path ltree);
+	
+-- have to use "using" clause in order to specify index type
+CREATE INDEX idx_paths_to_nodes ON paths_to_nodes USING gist(path);
+
+insert into  paths_to_nodes (node, path) values ('A', 'A');
+insert into  paths_to_nodes (node, path) values ('B', 'A.B');
+insert into  paths_to_nodes (node, path) values ('C', 'A.C');
+insert into  paths_to_nodes (node, path) values ('D', 'A.B.D');
+insert into  paths_to_nodes (node, path) values ('E', 'A.B.E');
+insert into  paths_to_nodes (node, path) values ('F', 'A.C.F');
+insert into  paths_to_nodes (node, path) values ('G', 'A.C.G');
+insert into  paths_to_nodes (node, path) values ('H', 'A.B.D.H');
+insert into  paths_to_nodes (node, path) values ('I', 'A.B.D.I');
+insert into  paths_to_nodes (node, path) values ('J', 'A.B.D.J');												 
+insert into  paths_to_nodes (node, path) values ('K', 'A.C.F.K');
+
+-- this select statement will only return the rows where the path starts with an A.B
+SELECT * FROM paths_to_nodes
+WHERE 'A.B' @> path
+
+-- this select statement will return anything with a B in the path
+SELECT * FROM paths_to_nodes
+WHERE '*.B.*' ~ path
+
+-- this select statement will return anything with a B in the path and only one digit following
+SELECT * FROM paths_to_nodes
+WHERE '*.B.*{1}' ~ path
+
+-- this select statement will return anything with a B in the path and 0, 1 or 2 digits afterwards
+SELECT * FROM paths_to_nodes
+WHERE '*.B.*{0,2}' ~ path
+
+-- this CTE will concatenate (via cartesian product) the paths_to_nodes table filtered based on pathway containing a B along with the same table filtered based on a pathway containing C
+WITH paths_to_concat AS
+	(SELECT *
+	FROM paths_to_nodes as p2
+	WHERE p2.path ~ '*.C.*')
+	
+SELECT 
+	p1.id, p1.node, p1.path, p1.path || p2.path
+FROM paths_to_nodes as p1,
+	 paths_to_concat as p2
+WHERE p1.path ~ '*.B.*'
+
+
+
+
+
+
+
+
+
+
+
+
+
+

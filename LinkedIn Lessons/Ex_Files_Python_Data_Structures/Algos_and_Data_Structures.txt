@@ -1,0 +1,100 @@
+Overview of data structures and algorithms discussed:
+
+Depth-First Search - this algorithm is considered to be aggressive and uses the Stack data structure
+	- not going to be the fastest, but this will eventually yield a result
+	- the path chosen is continued until a dead end; then, the alogrithm will back track and attempt another route until a dead end is reached; this process is repeated until the solution is 	found
+	Applications of DFS:
+		- optimizations for criteria (cost, speed, safety, fuel, etc.)
+		- pathfinding
+		- scheduling algorithms
+		- assessing investment decision trees
+		- ordering of formula cell evaluation in spreadsheets
+		- determining the order of compilation tasks for software builds
+		- data serialization
+		- resolving symbol discrepancies
+	High-level flow for the algo:
+		- pop the stack
+		- is this the goal?
+		- if so, we are done
+		- otherwise, push undiscovered neighbors (all adjacent, going clockwise - up, right, down, left.. this is important) onto the stack and add them to predecessors/discovered
+			- the predecessors dictionary is used to reference the path 
+		- repeat while there are items still on the stack
+		
+
+What about the Queue data structure?
+	Applications of the Queue:
+		- CPU scheduling
+		- Data is transferred asynchronously between two processes
+		- Graph traversal algorithms
+		- Transport and operations management
+		- File servers
+		- IO buffers
+		- printer queues
+		- phone calls to customer service hotlines
+		- resource is shared among multiple customers
+	What does a queue look like? FIFO (first in, first out)
+		- can be defined as having a left end (head), and right end (tail)
+			- head is where we remove values
+			- tail is where we add/append values
+	Signature operations:
+		- enqueue(): add an item to the end of the queue
+		- dequeue(): remove and return the item at the front
+		
+		
+Applications of Breadth-First Search algo:
+	- first of all, the breadth-first search algo is essentially a propogation in all directions algo (flood fill)
+	- GPS systems
+	- Flight reservation systems
+	- Finding neighbor nodes in peer-to-peer networks
+	- Social networking sites to find connections between users
+	- Web crawlers
+	- Many applications in artifical intelligence 
+	- Electronics and communication engineering 
+		
+
+What about Priority Queue Data Structure:
+	Applications of the Priority Queue - 
+		- artifical intelligence: for example, A* search algorithm
+		- optimization algorithms
+		- operating system process scheduling
+		- bandwidth management
+		- statistical analysis
+		- spam filtering
+	Priority Queue Operations:
+		- get(): retrieve the item with the highest priority
+		- put(item): add item to priority queue
+		- is_empty(): determine if the priority queue is empty
+		
+
+Overview of the A* algo: finding the shortest path to the solution
+	Applications of the A* algo - 
+		- traffic navigation system
+		- social network analysis
+		- natural learning processing
+		- machine learning
+		- puzzle solutions and puzzle-analogous problems
+		- algorithmic trading
+		- robotics
+		- video games
+	Key Values in the A* algorithm:
+		- G value: best distance from start to current cell 
+		- H value: heuristic distance from current cell to destination
+		- F value: sum of the G value and the H value (representing the probable optimal value or minimum distance based on the heuristic used)
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

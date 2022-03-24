@@ -1,0 +1,41 @@
+Partitioning: 
+- large tables can be difficult to query efficiently
+- split tables by rows or columns into partitions
+	horizontal partitioning:
+	- limit scans to subset of partitions
+	- local indexes for each partition
+	- efficient adding and deleting of data
+		range partitioning: type of horizontal partition
+		- partition on non-overlapping keys
+		- partition by date is common
+		- numeric or alphabetic horizontal partitioning (e.g. by region)
+		- partition on value or list of values
+	vertical partitioning:
+	- separation out of columns 
+	- increase the number of rows that can fit into a data block (effectively is columnar storage)
+	- global indexes for each partition
+	- can reduce I/O
+	hash partitioning:
+	- partition on modulus of hash of partition key
+	- useful when data does not logically group into sub-groups
+	- want even distributions of data
+	
+
+-- creating a new schema for this advanced SQL course
+CREATE SCHEMA iot;
+
+DROP TABLE IF EXISTS iot.sensor_msmt;
+
+-- creating partitioned data tables within the iot schema (by month)
+CREATE TABLE iot.sensor_msmt (
+	sensor_id int not null, 
+	msmt_date date not null, 
+	temperature int, 
+	humidity int)
+	PARTITION BY RANGE (msmt_date);
+	
+CREATE TABLE iot_sensor_msmt_y2021m01 PARTITION OF iot.sensor_msmt
+	FOR VALUES FROM ('2021-01-01') TO ('2021-02-01');
+	
+CREATE TABLE iot_sensor_msmt_y2021m02 PARTITION OF iot.sensor_msmt
+	FOR VALUES FROM ('2021-02-01') TO ('2021-03-01');	

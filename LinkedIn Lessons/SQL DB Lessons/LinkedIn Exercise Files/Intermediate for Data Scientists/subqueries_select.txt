@@ -1,0 +1,11 @@
+-- using subqueries in order to do more complex querying
+
+select
+	e1.last_name, 
+	e1.salary,
+	e1.department_id,
+	(select
+		round(avg(salary),2) 
+	 from data_sci.employees as e2 where e1.department_id = e2.department_id) 
+from
+	data_sci.employees as e1

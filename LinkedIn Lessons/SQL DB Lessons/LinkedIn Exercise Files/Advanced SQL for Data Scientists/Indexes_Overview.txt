@@ -1,0 +1,202 @@
+Indexing for Analytical Queries
+
+Why use Indexes?
+	- reduces need to scan data blocks
+	- comes at cost of additional writes during data loading
+	- the higher the cardinality of indexed data, the better the performance improvement
+	
+Types of Indexes
+	- B-tree
+	- Bitmap
+	- Hash
+	- Special-purpose
+
+How to understand how optimized your query is? 
+	- use EXPLAIN (select statement...) and see the output
+	- find the field "join type" or "type"... should be named access type instead; reference the value
+		- if the value is "const" or "eq_ref", you're query is essentially fully optimized 
+			- does a binary search in order to find a unique value; have to be able to guarantee uniqueness (primary key on the column or a unique constraint on a column)
+		- "REF" or "range" - limits the range of data points that we are going to be accessing/inspecting
+			- performs a b-tree traversal to find the starting point
+		- INDEX.. also known as a full index scan
+			- scan through all leaf nodes
+		- ALL.. full table scan; avoid at all costs
+
+Pitfalls of using indexes:
+	1. 
+	2. column order matters for multi-column indexes
+	3. Inequality operators
+
+Pitfalls explained by way of examples... example is using 2.5 million orders randomly generated with an order_id, total, user_id and created_at columns
+	- (1) let's say that you wanted to use an index where you call a function limit the dataset within the where clause.. see example below where we identified the index as "created_at" (runtime = 630ms)
+		- SELECT sum(total)
+		-	FROM Orders
+		- WHERE YEAR(created_at) = 2012
+	- the above example would return an EXPLAIN output for access type of ALL; you are not able to use functions and indexes in the same breath per se; also, there were no possible keys to use 
+	- this is because let's say that we used WHERE LEN(column b) > 5
+		- this effectively tries to do a filtering on an integer based on a string column; there is no identifiable intersection when the data types are different
+
+	- (2) next, you use the following query instead: (runtime = 630ms)
+		- SELECT sum(total)
+		-	FROM Orders
+		- WHERE created_at BETWEEN '01-01-2013 00:00:00' AND '12-31-2013 23:59:59'; this still results in a full table scan, but now we have a "possible keys" option of "orders_created_at_idx"
+
+	- (3) do not use this in practice, for the third attempt, we will use the FORCE command (runtime = 4000ms or 4 seconds)
+		- SELECT sum(total)
+		-	FROM Orders FORCE INDEX (orders_created_at_idx)
+		- WHERE created_at BETWEEN '01-01-2013 00:00:00' AND '12-31-2013 23:59:59'; 
+		- This results in a RANGE scan instead of an ALL.. Is this an improvement? Nope.. it actually slowed down the query performance
+		- instead of fractions of a second, it now takes 4 seconds to run the query
+		- this goes back to what data is being stored on the index
+	- Summary: when we forced the use of an index, it made it to where the databased had to read into the disk one row at a time for 466,000 rows (all orders created in 2013) 
+		- whenever we didn't force an index, the database was smart enough to do batch processing, so we were able to read thousands of rows at a time in disk instead of one by one
+
+	- let's now try (4): changing the index to include created_at and total (runtime = 92ms)
+	- running the query again such as in (2) results in the following explain output
+		- access type: RANGE
+		- it automatically identified and leveraged the index
+		- the thing to consider here is that this index selection is somewhat aggressive and may only be applicable to this specific query which makes it quite expensive, as the index is stored on memory
+
+	- suppose the boss comes back to you and requests that you add in a filtering component, so we can filter down to a specific employee
+	- ok.. "well that has to be easy enough".. just include an AND statement within the WHERE clause right?
+	- (5) example to include employee filtering (runtime = 2000ms)
+		- SELECT sum(total)
+		-	FROM Orders
+		- WHERE created_at BETWEEN '01-01-2013 00:00:00' AND '12-31-2013 23:59:59'
+		- AND user_id = 136
+	- well, it looks like the same issue popped up as in example (1) where we are doing another full table scan, so let's repeat what we did in example (4) where we just add the "user_id" field to the index
+	- this gets us back to a RANGE scan, but now it's saying that we still have to look at 477,000 rows instead of a couple dozen orders
+	- why is the DB not using the index to its fullest extent?
+		- you can use a multi-column index from left to right.. you cannot skip columns within the where column; the column order in an index matters
+		- let's change the order of the index to put the user_id into the second position
+	- this change actually didn't change anything because of the inequality operator pitfall; we were calling the created_at column before the user_id column 
+		- hence, because the user_id column is filtering, we had to do a full scan still of the 470,000 rows
+	- final example (6) using index ordered by: user_id, created_at, total (runtime = <1ms with only ~800 rows scanned)
+
+
+
+
+
+
+B-tree overview:
+	- B: balanced 
+	- capture small amounts of data
+	- work well in many different cases
+	- ability to look up values in logarithmic time (Order N lookup time) because it is a binary tree meaning each sequential node is broken up into two nodes
+	- hence, you start with the root node, break it out into two nodes, and then each of those nodes has two nodes, so by level 2, you have 2^n nodes or 4 total
+	
+Bitmap overview:
+	- essentially encoding categorical columns while preserving the original column; this is slightly redundant
+	- used when small number of possible values in a column (low cardinality)
+	- filter by bitwise operations, such as AND, OR and NOT
+	- time to access is based on time to perform bitwise operations (which are typically pretty fast)
+	- read-intensive use cases, few writes (can be expensive to build bitmap indexes at times)
+	- index availability - 
+		- some databases allow you to create bitmap indexes explicitly
+		- postgreSQL does not
+		- but postgreSQL builds bitmap indexes on the fly as needed
+		
+Hash overview:
+	- uses hash functions - function for mapping arbitrary length data to a fixed-size string
+	- has values virtually unique
+	- even slight changes in input produce new hash
+	- size of the hash value depends on algo used
+	- no order preserving with hash functions
+	- similar inputs have vastly different outputs
+	when to use hash indexed? 
+		- equality operations only
+		- can be smaller than B-tree indexes(PostgreSQL)
+		- comparable with speed of B-tree build and access
+		
+GiST and SP-GiST overview:
+	- generalized search tree
+	- balance tree-structure access method
+	- used as template to implement other indexing schemes
+		- b-tree: self-balancing tree; operations in logarithmic time
+		- r-tree: index of multidimensional data such as geographic coordinates
+	- in PostgreSQL, GiST indexing is used for the following specialized data types: hstore, ltree
+	- operator classes and indexed data types:
+		- Box_ops: box
+		- Circle_ops: circle
+		- Inet_ops: inet, cidr
+		- Point_ops: point
+		- Poly_ops: polygon
+	- SP-GiST is useful for non-balanced data structures
+		- supports partitioned search trees
+		- quadtree - tree with internal nodes having four children
+		- k-d tree - k-dimensional tree, used to index points in k-dimensional space
+
+GIN overview:
+	- GIN - Generalized inverted index
+	- used when data need to be indexed are composite values
+	- composite values require index to search for elements within composite item
+	- example being words in a document
+	- index store data in pairs (key, posting list)
+		- key is an element value
+		- posting list is a set of row IDs in which the key occurs
+	- built-in operator classes:
+		- Array_opse - any array
+		- Json_ops - jsonb
+		- Json_path - jsonb
+		- Tsvector_ops - text vectors
+	- Tips
+		- insertion can be slow because many keys may be inserted for each item, for example, many words in a document
+		- for very bulky operations, likely faster to drop and recreate index
+		- Postgres can postpone much of indexing work by using temporary lists
+			- temporary lists eventually are inserted into index using optimized bulk insertion techniques
+			- disadvantage is that temporary list must be searched in addition to regular index
+			- large temporary lists will slow searches signficantly 
+			- disable fastupdate parameter in CREATE INDEX to disable temporary lists
+	
+BRIN overview:
+	- BRIN - Block range index
+	- block ranges are pages that are physically adjacent in a table
+	- stores summary information about block ranges
+	- BRIN indexes tend to be small 
+		- entries are for block ranges
+		- don't have details about individual elements
+		- quickly scan; skip large amounts of data based on min/max
+	- built-in operators:
+		- Date_minmax_ops
+		- Char_minmax_ops
+		- Float8_minmax_ops
+		- Timestamp_minmax_ops, etc.
+		
+
+		
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

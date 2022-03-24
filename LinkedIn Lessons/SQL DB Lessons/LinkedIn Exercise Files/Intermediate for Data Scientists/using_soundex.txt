@@ -1,0 +1,13 @@
+select 
+	soundex('Postgres'),
+	soundex('Postgresss'),
+	('Postgres' = 'Postgresss'),
+	soundex('Postgres') = soundex('Postgresss'), 
+	difference('Postgres','Kostgres'),
+	difference('Postgresss','Postgres')
+	
+-- levenshtein operator tells us how many operations it takes to match two strings
+-- quantifies how different two strings are
+select 
+	levenshtein('Postgres','Kostgres'), -- output is 1
+	levenshtein('Postgres','mySQL') -- output is 8

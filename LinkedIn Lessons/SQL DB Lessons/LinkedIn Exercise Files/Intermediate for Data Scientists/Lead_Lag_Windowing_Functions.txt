@@ -1,0 +1,27 @@
+-- windowing continued: rank, lead, lag
+-- just remove the partition by, if you want to rank the entire data table instead of by a specific grouping
+select
+	department_id, 
+	last_name,
+	salary, 
+	rank() over(partition by department_id order by salary desc)
+from
+	data_sci.employees
+	
+-- this lead function call returns 2 values away from the row (2 rows ahead)
+select
+	department_id, 
+	last_name,
+	salary, 
+	lead(salary, 2) over(partition by department_id order by salary desc)
+from
+	data_sci.employees
+
+-- lag
+select
+	department_id, 
+	last_name,
+	salary, 
+	lag(salary, 2) over(partition by department_id order by salary desc)
+from
+	data_sci.employees

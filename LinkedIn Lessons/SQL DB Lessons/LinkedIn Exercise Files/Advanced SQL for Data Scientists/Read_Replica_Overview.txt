@@ -1,0 +1,14 @@
+-- read replicas
+-- might want to use a OLTP system to retrieve data continuously; this can be expensive in terms of computational resources required
+-- this is where read replicas come into play
+-- any time data is written to the primary, it is also written to another instance of a database server
+-- direct queries to the read replica instead of the primary server
+-- why read replicas?
+--		- primary can focus on writes
+--		- multiple replicas can scale to meet read load requirements
+--		- especially useful when more read than write workload
+--		- need to consider eventual consistency
+-- there are a few ways to push updates from the primary server to the read replica (there is a parameter for consistency)
+-- in the first scenario, the "fire and forget" method, the primary would just send the data to the read replica and assume that it was written successfully
+-- the first scenario is the fastest way to update, but the drawbacks are that there is no 100% confirmation that all data has been updated/re-written successfully
+-- in the second scenario, the slower method guarantees that the data has been saved to the primary and replica storage along with an acknowledgment

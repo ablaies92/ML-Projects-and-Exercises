@@ -1,0 +1,11 @@
+-- introduction to window functions
+-- first_value will return the first value of specified row for a particular group
+-- we are trying to get the minimum salary within each department 
+select
+	department_id, 
+	last_name, 
+	salary,
+	first_value(salary) over (partition by department_id order by salary asc)
+from 
+	data_sci.employees
+	

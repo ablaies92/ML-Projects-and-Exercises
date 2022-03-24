@@ -1,0 +1,9 @@
+-- using subqueries in order to do more complex querying in the from section
+
+select
+	round(avg(salary),2)
+from
+	(select
+	 * 
+	 from data_sci.employees
+	 where salary > 100000) as e1

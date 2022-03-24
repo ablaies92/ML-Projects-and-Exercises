@@ -1,0 +1,45 @@
+hstore for key-value pairs:
+	- data type for storing sets of key-value pairs
+	- columns defined as hstore data type
+	- key-value pairs represented as a string
+		- 'key1 => value1, key2 => value2, key3 => value3'
+	why would you use hstore?
+		- keys not predefined
+		- useful when large number of attributes are not used (sparse data)
+		- do not need to change table definition to accomodate new columns
+		- GIN and GiST indexes can index all keys
+		- Example use case: catalog
+	hstore limitations:
+		- all keys and values are stored as strings only
+		- does not support hierarchical data structures
+		- JSONB or XML data types can be used instead
+	
+how to:
+	- CREATE EXTENSION hstore
+	- CREATE TABLE my_kv_table (id serial, primary key kv_set hstore)
+	
+example:
+
+CREATE EXTENSION hstore;
+
+-- creating the table; this is saved (by default) to the public schema, as I didn't explicitly specify a schema to use
+CREATE TABLE books(
+	id serial primary key, 
+	title text, 
+	attributes hstore
+);
+
+-- inserting data into the above table 
+INSERT INTO books (title, attributes) VALUES
+	('SQL for Data Science',
+	 'language=>English, page_cnt=>500, pub_year=>2021');
+	 
+INSERT INTO books (title, attributes) VALUES
+	('SQL for Data Science 2',
+	 'language=>English, page_cnt=>600, pub_year=>2022');
+	 
+SELECT * FROM books;
+
+-- remember that hstore only stores strings
+SELECT title, attributes->'page_cnt' as page_count FROM books
+WHERE attributes->'page_cnt' = '500'

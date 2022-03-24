@@ -1,0 +1,56 @@
+JSON for semi-structured data:
+	- Relational and noSQL
+		- modeling document databases
+		- flexible schema 
+		- nested structures (e.g. below)
+			- Customer Summary
+				- Name
+					- First Name
+					- Last Name
+				- Address
+					- Street
+					- City
+					- State
+				- Purchase History
+					- Annual Purchase Value
+					- Lifetime Value Estimate
+		- JSON and JSONB would do well with the above example
+			- allows querying and indexing on elements in JSON
+			- validates a string is valid JSON
+			- JSON in PostgreSQL 9.2 represents JSON in plaintext
+			- JSONB in PostgreSQL 9.4 JSON better
+				- binary representation
+				- more efficient storage
+				- can use GIN indexes
+				- indexes all key-value pairs in structure
+		- query and index support for document structures
+
+Example... 
+
+DROP TABLE IF EXISTS customer_summary;
+
+CREATE TABLE customer_summary (
+	id serial primary key, 
+	customer_doc jsonb);
+	
+-- json's support nested arrays
+INSERT INTO customer_summary (customer_doc) VALUES 
+	('{"customer_name":{"first_name":"Alice",
+	 					"last_name":"Johnson"},
+	   "address":{"street":"5432 Port Ave",
+	 			  "city":"Boston",
+	 			  "state":"MA"},
+	   "purchase_history":{"annual_purchase_value":[100,200,350],
+	 						"lifetime_value":1500}
+	 }')
+	 
+SELECT *
+FROM customer_summary
+
+-- use the following command below to just extract the customer_name key and associated value
+SELECT customer_doc->'customer_name'
+FROM customer_summary
+
+-- use the following command below to just extract the first_name key and associated value
+SELECT customer_doc->'customer_name'->>'first_name'
+FROM customer_summary

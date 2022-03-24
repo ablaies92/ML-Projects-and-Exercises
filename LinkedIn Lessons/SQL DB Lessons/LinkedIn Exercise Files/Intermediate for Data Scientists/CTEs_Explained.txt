@@ -1,0 +1,19 @@
+﻿-- when thinking about recursion, consider an organizational structure where the lowest-level employee is tied to
+-- CEO in some way (finding the root node from a leaf node)
+
+-- WITH RECURSIVE <table name> (<columns>) AS
+-- 		<terminal select statement>
+--		UNION
+--		<recursive select statement>
+-- SELECT ...
+
+with recursive report_structure (id, department_name, parent_department_id) as
+ (select id, department_name, parent_department_id
+  from data_sci.org_structure where id=4
+  union
+  select os.id, os.department_name, os.parent_department_id
+  from data_sci.org_structure as os
+  join report_structure as rs on rs.parent_department_id = os.id)
+--primary select statement
+select * 
+from report_structure

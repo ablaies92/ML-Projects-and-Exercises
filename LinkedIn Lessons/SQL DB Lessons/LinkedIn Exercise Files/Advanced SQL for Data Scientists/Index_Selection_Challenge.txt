@@ -1,0 +1,12 @@
+Indexing Challenge:
+
+You have received a large dataset of insurance claim details. You want to ingest that data into an existing database you are using for data science and analytics. 
+Each claim has a unique claim identifier and 12 columns of data about the claim. The existing database has a table of all claim numbers ever generated
+
+How would you index the new claim detail data to optimize a join operation on the claim ID?
+
+By default, Postgres will use a b-tree index; for this example, because the claim IDs are all unique and we don't need to do a range find, a hash index (where you convert the claim ID into a 32 bit integer) would be useful...
+
+
+If you are indexing a column that contains a value of 1-100, which value should you index first? 
+50, as this creates a balanced index

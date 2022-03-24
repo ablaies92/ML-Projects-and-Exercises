@@ -1,0 +1,23 @@
+-- more windowing functions: width_bucket and cume_dist (rankings with percentages)
+-- the width bucket allows you to essentially bin observations/build a histogram
+-- first value is the column, second is the min salary, third value is the max value, and 10 is the # of bins
+select
+	department_id, 
+	last_name, 
+	salary,
+	width_bucket(salary, 0, 150000, 10)
+from
+	data_sci.employees
+
+-- cum distribution example
+-- when using the round function initially as round(cume_dist() over (order by salary desc) * 100, 2)
+-- you get an error: function round(double precision, integer) does not exist
+-- cum distribution function returns a double precision, but it needs to be numeric
+-- in order to do this, just use the :: numeric call which is effectively like a cast in microsoft sql server
+select
+	department_id, 
+	last_name, 
+	salary,
+	round((cume_dist() over (order by salary desc) * 100)::numeric, 2)
+from
+	data_sci.employees

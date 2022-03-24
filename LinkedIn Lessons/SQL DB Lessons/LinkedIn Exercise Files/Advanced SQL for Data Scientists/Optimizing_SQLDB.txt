@@ -1,0 +1,115 @@
+SQL Query Optimization - 
+
+SQL overview:
+	- SQL is declarative
+	- You specify what you want
+	- Not how to get it
+	- the DB will figure out the procedural steps required for executing the query/statements/commands
+	Scanning is simple..
+		- scanning looks at each row
+		- fetch data block containing row
+		- apply filter or condition
+		- cost is based on the number of rows in a table (assumption being we are referencing a row-based storage DB)
+		- columnar cost is different
+		- scanning small tables is efficient versus maintaining and scanning an index
+		- scanning large tables can be efficient if few queries are required
+		- Indexes are ordered
+			- faster to search index for an attribute value
+			- points to location of row
+			- example - filter by checking index for match, then retrieve row
+	Different ways to join tables...
+		- nested loop joins (good when tables are small)
+			- loop through one table for each row
+			- loop through the other table
+			- at each step, compare keys
+			- simple to implement but can be expensive
+		- hash joins 
+			- compute hash values of key values in smaller table
+			- store in hash table, which has hash value and row attributes
+			- scan larger table; find rows from a smaller hash table 
+		- sort merge join
+			- sort both tables
+			- compare rows like nested-loops
+			- stop when it is not possible to find a match later in the table 
+			- scan the driving table only once
+Procedural Language Structure (e.g. Python) overview:
+	- you specify how to do something
+	- directly manipulate data structures in an order determined by your code
+
+
+EXPLAIN and ANALYZE commands:
+	- ANALYZE command updates statistics (sometimes statistics get out of date)
+		- when analyzing a large dataset, it samples the dataset instead of using the entire population
+
+
+
+
+
+
+
+
+
+
+EXAMPLE DATASET - 
+
+-- using the generate_series function to generate a list of numbers or dates/timestamps (between two dates for every minute)
+-- 60 timestamps for every hour
+
+INSERT INTO iot.sensor_msmt
+-- creating a CTE that encompasses creating two series (1100 instances with each instance having minute-by-minute readings from Jan 1st through Feb 15th)
+	(WITH sensors_datetimes AS
+		(SELECT *
+		 FROM
+			(SELECT *
+			FROM generate_series(1,1100)) as t1,
+			(SELECT *
+			FROM generate_series('2021-01-01 00:00'::timestamp,
+								 '2021-02-15 00:00'::timestamp,
+								 '1 minutes')) as t2
+		)
+-- pulling all data from CTE and then computing random temperature and humidity values for each row/observation
+		SELECT 
+			sd.*,
+			floor(random()*30) as temperature, 
+			floor(random()*80) as humidity
+		FROM
+			sensors_datetimes as sd
+	)
+	
+	
+SAMPLE QUERY - showing us the execution plan of the select statement; key thing to note here is that sql is executing on the partitions in parallel; using an index drastically reduced the query time
+	
+	EXPLAIN SELECT *
+	FROM iot.sensor_msmt
+	WHERE sensor_id BETWEEN 10 AND 20
+
+	-- creating an index to try and optimize the query runtime
+	CREATE INDEX idx_sensor_msmt_id ON iot.sensor_msmt(sensor_id)	
+	
+
+ADDING ANOTHER TABLE TO THE COMPREHENSIVE DATASET -
+	
+	create table iot.sensors as 
+		(with sensor_ids as
+		(select i from generate_series(1,100) as i)
+
+		select 
+		i as id,
+		'Sensor ' || i::text as sensor_name
+		from sensor_ids
+		)
+	
+
+FINAL QUERY INSPECTION - without the where clause, it is using a hash join; with the where clause, it ends up using a nested loop
+
+EXPLAIN SELECT
+ s.sensor_name, 
+ sm.msmt_date, 
+ sm.temperature, 
+ sm.humidity
+
+FROM 
+	iot.sensor_msmt as sm
+LEFT JOIN iot.sensors as s ON sm.sensor_id = s.id
+WHERE s.id = 30
+	

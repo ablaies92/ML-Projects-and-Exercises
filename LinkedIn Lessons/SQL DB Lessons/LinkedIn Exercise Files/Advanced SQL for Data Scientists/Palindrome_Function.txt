@@ -1,0 +1,8 @@
+Palindrome Function Example:
+
+CREATE OR REPLACE FUNCTION is_palindrome (str text) RETURNS boolean
+AS $$
+	SELECT reverse(str) = str
+$$ LANGUAGE SQL IMMUTABLE; 
+
+SELECT is_palindrome('abccba'), is_palindrome('foobarbaz')

@@ -1,0 +1,8 @@
+--aggregate functions are not allowed in a where clause; this is where the "having" clause comes into the fold
+
+select cd.department_name, count(*)
+from data_sci.employees as e
+join data_sci.company_departments as cd on e.department_id = cd.id
+group by cd.department_name
+having count(*) > 50
+order by cd.department_name

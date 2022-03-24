@@ -1,0 +1,45 @@
+Materialized Views:
+- a form of caching 
+- trading space for time (adds to storage, but simplifies the reading of a queried series of complex joins n such)
+- persisted results of a query
+- execute a query once
+	- save results once
+	- read many times
+- when to use materialized views...
+	- long-running queries
+	- complex queries, especially joins
+	- compute aggregates or other derived data
+	- separate read and write operations
+- when not to use materialized views...
+	- eventual consistency (materialized views can get out of sync with the underlying tables leveraged)
+		- for example... if you're materialized view is setup to refresh every hour, but the underlying data is steaming (every 5-10 minute pulls), then you might not have the latest data
+		- could just refresh more frequently
+	- cost of update process
+	- concurrent reads during update
+	- size of materialized view data
+	- refresh frequency
+	
+-- materialized views example without the tables; landon is the name of the schema
+-- simple query is denoted below
+SELECT 
+	l.hotel_id, l.city, l.state_province, l.country, 
+	e.year, e.annual_payroll, e.health_insurance, e.supplies
+FROM
+	landon.locations as l
+	LEFT JOIN landon.expenses as e ON l.hotel_id = e.hotel_id
+
+-- creating the materialized view
+CREATE MATERIALIZED VIEW landon.mv_locations_expenses AS
+(SELECT 
+	l.hotel_id, l.city, l.state_province, l.country, 
+	e.year, e.annual_payroll, e.health_insurance, e.supplies
+FROM
+	landon.locations as l
+	LEFT JOIN landon.expenses as e ON l.hotel_id = e.hotel_id
+)
+
+SELECT * FROM landon.mv_locations_expenses;
+
+-- below will re-execute the above select statement
+REFRESH MATERIALIZED VIEW landon.mv_locations_expenses;
+	

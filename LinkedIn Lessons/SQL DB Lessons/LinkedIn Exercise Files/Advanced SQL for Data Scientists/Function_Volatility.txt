@@ -1,0 +1,24 @@
+Function Volatility:
+	- functions have a volatility classification
+	- specifies the kinds of behaviors a function has
+	- used to allow the optimizer to make assumptions about the function
+	3 types of classification:
+		- volatile (default classification) - can perform any operation, including making changes to the db
+			- optimizer makes no assumptions about the function
+			- function is reevaluated at every row the function is needed
+		- stable - cannot modify the database
+			- guaranteed to return the same results given the same arguments for all rows within a single statement
+			- enables some optimization
+		- immutable - cannot modify the database
+			- guaranteed to return the same results given the same arguments in all cases
+			- enables the most optimizations
+	Key points about Volatility:
+		- use the most strict volatility classification possible for optimal performance
+		- any function with side effects must be volatile
+		- if a function has no side effects but uses another function that can change a value in the query, the user defined function must be volatile
+	Let's now look at an example of how you declare the volatility... 
+		CREATE OR REPLACE FUNCTION harmonic_mean(x numeric, y numeric) RETURNS numeric
+		-- working with strings requires the $$; defining the language to use
+		AS $$
+			SELECT round(((2 * x * y)/(x + y))::numeric, 2)
+		$$ LANGUAGE SQL IMMUTABLE

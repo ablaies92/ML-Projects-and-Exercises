@@ -1,0 +1,25 @@
+-- using windowing nth_value and ntile functions
+-- look at the average salary within a department and comparing that to individual salaries
+-- have to use the round function by encapsulating the entire over statement
+select
+	department_id, 
+	salary,
+	round(avg(salary) over(partition by department_id),2) as Average_Department_Salary
+from
+	data_sci.employees
+	
+-- creating quartiles
+select
+	department_id, 
+	salary, 
+	ntile(4) over (partition by department_id order by salary desc) as quartile
+from
+	data_sci.employees
+	
+-- finding the nth value; prior rows that are higher in value will be returned as null
+select
+	department_id, 
+	salary, 
+	nth_value(salary, 5) over (partition by department_id order by salary desc) as nth
+from
+	data_sci.employees

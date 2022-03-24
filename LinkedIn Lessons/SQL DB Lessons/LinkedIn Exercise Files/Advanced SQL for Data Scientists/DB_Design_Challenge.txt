@@ -1,0 +1,19 @@
+Challenge: Design a data model for analytics
+
+Problem: An IoT company collects streaming data from thousands of sensors every minute
+	- requirements: 
+		- low, consistent latency (need to get hourly data points relatively quickly)
+		- access to data older than one hour
+	- data scientists will perform time series analysis, including rollups of aggregate data by sensor over hours and days
+
+Solution:
+	- initial thoughts: 
+		- what is the high-level model
+		- what kind of structures
+		- what kind of design patterns
+	- sensor data should be written to a columnar table that captures all of the attributes (sensor_id, timestamp and 3 measurements)
+	- write that table to sub-tables that are partitioned by time (not all of the requirements are going to outlined for you)
+	- this is a good use case for materialized views (generate views of aggregated data by hour and by day) - refresh at least once per hour
+	- do the data scientists need access to low-level detail and aggregates? 
+		- this would be a good use case for a read replica
+	
